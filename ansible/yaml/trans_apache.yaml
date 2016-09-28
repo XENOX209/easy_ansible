@@ -1,0 +1,17 @@
+#    - name: copy httpd.conf for tranmit to "trasmit_ip" by Rewrite module
+#      lineinfile: insertafter='<Directory "/var/www/html">'  dest=/etc/httpd/conf/httpd.conf force=yes line={{item}}
+#      with_items:
+#      - '    RewriteRule ^.*$ - [R=503,L]'
+#      - '    RewriteCond %{REQUEST_URI} !=/maintenance.html'
+#      - '    RewriteRule (.*) http://{{transmit_ip}}:{{listen_port}}/$1 [P,L]'
+# need a space before "%{{RE..."for write by lineinfile
+#      - '    RewriteCond  %{REQUEST_URI} !=/maintenance.html'
+#      - '    RewriteCond http://{{transmit_ip}} -U'
+#      - '    RewriteEngine On'
+#      - '    ErrorDocument 503 /maintenance.html'
+
+    - name: set http.conf by template
+      template: dest=/etc/httpd/conf/httpd.conf src=/home/st02/ansible/conf/httpd.conf.j2
+
+    - name: run httpd
+      service: name=httpd state=restarted enabled=yes

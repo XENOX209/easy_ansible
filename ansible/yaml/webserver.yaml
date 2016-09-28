@@ -1,0 +1,23 @@
+- name: webserver
+  hosts: webs
+  become: true
+#  vars:
+#    transmit_ip: 172.31.2.15
+#    listen_port: 5000 
+#    group_name: test
+#    gid: 3000
+#    linux_user_name: test_user
+#    uid: 3001
+  vars_files:
+#    - web_var.yaml
+     - main_var.yaml
+  tasks:
+    - name : create {{linux_user_name}} 
+      include: create_user.yaml
+
+    - name: install apache
+      include: inst_apache.yaml
+
+    - name: add apache's conf transmit (need transmit_ip,listen_port) 
+      include: trans_apache.yaml
+

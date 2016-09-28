@@ -1,0 +1,22 @@
+- name: dbserver
+  hosts: dbs
+  become: true
+  vars_files: 
+    - 'main_var.yaml'
+  tasks:
+    - name: add {{linux_user_name}}
+      include: create_user.yaml
+
+    - name: install mariaDB
+      include: inst_mariaDB.yaml
+
+    - name: create and import DB
+      include: createDB_mariaDB.yaml
+
+    - name: create {{db_user}}
+      mysql_user: 
+        name={{db_user}}
+        password={{db_user}}  
+        host={{allow_ip_by_db}}
+        priv='testdb.*:ALL'
+        state=present

@@ -1,0 +1,46 @@
+- name: dbserver
+  hosts: dbs
+#  user: root
+#  sudo : yes
+  become: true
+#  vars:
+#    db_user: testuser
+#    allow_ip_by_db: 172.31.%
+#    new_db_name: testdb
+#    group_name: test
+#    gid: 3000
+#    linux_user_name: test_user
+#    uid: 3001
+  vars_files: 
+    #- 'db_var.yaml'
+    - 'main_var.yaml'
+  tasks:
+    - name: add {{linux_user_name}}
+      include: create_user.yaml
+
+    - name: install mariaDB
+      include: inst_mariaDB.yaml
+
+    - name: create and import DB
+      include: createDB_mariaDB.yaml
+
+    - name: create {{db_user}}
+      mysql_user: 
+        name={{db_user}}
+        password={{db_user}}  
+        host={{allow_ip_by_db}}
+        priv='testdb.*:ALL'
+        state=present
+
+## failed when already exist testuser 
+#    - name: command version create "testuser"
+#      command: mysql -u root -e "grant all privileges on testdb.* to testuser@'%' identified by 'testuser' with grant option;" 
+
+## need python-MySQL in gw02. 
+#    - name: import db *need copy dumpfile to remote host* (create table "User")
+#      become: false
+#      local_action: mysql_db login_host={{ansible_default_ipv4}} name=testdb state=import target=/home/st02/ansible/conf/testdb.sql
+
+##failed when alredy exist User table
+#    - name: create table "User" command version
+#      command: mysql -u root -e "CREATE TABLE testdb.User (id int,name varchar(20));"

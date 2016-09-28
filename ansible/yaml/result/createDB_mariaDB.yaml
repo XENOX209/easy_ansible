@@ -1,0 +1,11 @@
+    - name: create {{new_db_name}}
+      mysql_db: name=testdb state=present
+
+    - name: copy testdb's dump file to remote host
+      copy: src=/home/st02/ansible/conf/testdb.sql dest=/testdb.sql force=yes
+
+    - name: create user table by import
+      mysql_db: name={{new_db_name}} state=import target=/testdb.sql
+
+    - name: remove testdb's dump file in remote host
+      file: path=/testdb.sql state=absent

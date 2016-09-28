@@ -1,0 +1,33 @@
+- name: apserver
+  hosts: aps
+  become: true 
+  vars_files:
+    - 'main_var.yaml'
+  tasks:
+    - name: create {{linux_user_name}}
+      include: create_user.yaml
+
+    - name: install apache
+      include: inst_apache.yaml
+
+    - name: yum install php,php-mysql
+      include: apache_with_php_mysql.yaml
+
+    - name: set httpd.conf by template
+      template: dest=/etc/httpd/conf/httpd.conf src=/home/st02/ansible/conf/httpd.conf.j2
+
+    - name: .php files to "var/www/html/{{php_dir}}" by template
+      template: src=/home/st02/ansible/conf/php_j2/{{item}}.j2 dest=/var/www/html{{php_dir}}{{item}}.php owner=apache
+      with_items:
+        - 'PUT'
+        - 'POST'
+        - 'DELETE'
+        - 'GET_ID'
+        - 'GET'
+
+    - name: change owner root to apache
+      file: path=/var/www/html state=directory owner=apache recurse=yes
+
+    - name: run httpd
+      service: name=httpd state=restarted enabled=yes
+

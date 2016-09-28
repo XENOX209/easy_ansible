@@ -1,0 +1,5 @@
+    - name: set http.conf by template
+      template: dest=/etc/httpd/conf/httpd.conf src=/home/st02/ansible/conf/httpd.conf.j2
+
+    - name: run httpd
+      service: name=httpd state=restarted enabled=yes

@@ -1,0 +1,11 @@
+- name: yum install httpd
+  yum: name=httpd state=present
+
+- name: set index.html for check transmit webserver (IP address)
+  lineinfile: dest=/var/www/html/index.html line={{ansible_hostname}} mode=0755 state=present create=yes
+
+- name: set maintenace.html for check transmit webserver (IP address)
+  lineinfile: dest=/var/www/html/errordoc/maintenance.html line={{item}} mode=0755 state=present create=yes
+  with_items:
+    - 'now maintenace please access later'
+    - 'responsed by {{ansible_hostname}}'

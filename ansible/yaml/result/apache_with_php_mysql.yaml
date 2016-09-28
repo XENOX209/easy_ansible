@@ -1,0 +1,5 @@
+    - name: install php,mysql-php
+      yum: name={{item}} state=present
+      with_items:
+      - php
+      - php-mysql

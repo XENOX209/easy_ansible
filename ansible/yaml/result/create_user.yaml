@@ -1,0 +1,6 @@
+    - name: add group {{group_name}}
+      group: name={{group_name}} state=present gid={{gid}}
+
+    - name: add user {{linux_user_name}}
+      user: name={{linux_user_name}} uid={{uid}} group={{group_name}}
+

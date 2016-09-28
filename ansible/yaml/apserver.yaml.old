@@ -1,0 +1,55 @@
+- name: apserver
+  hosts: aps
+  become: true 
+#  vars:
+#    listen_port: 5000 
+#    php_dir: /v1/users
+#    group_name: test
+#    gid: 3000
+#    linux_user_name: test_user
+#    uid: 3001
+  vars_files:
+    #- ap_var.yaml
+    - 'main_var.yaml'
+  tasks:
+    - name: create {{linux_user_name}}
+      include: create_user.yaml
+
+    - name: install apache
+      include: inst_apache.yaml
+
+    - name: yum install php,php-mysql
+      include: apache_with_php_mysql.yaml
+
+#    - name: addwrite Rewritemodule to httpd.conf for transmit users/:id
+#      lineinfile: insertafter='DocumentRoot'  dest=/etc/httpd/conf/httpd.conf line={{item}} mode=0755
+#      with_items:
+#      - ' </Directory>'
+#      - '    RewriteRule ^(\d+)$ index.php\?id=$1'
+#      - '    RewriteCond  %{REQUEST_URI} !={{php_dir}}/index.php'
+#      - '    RewriteEngine On'
+#      - '     Require all granted'
+#      - '     Options Indexes FollowSymLinks'
+#      - ' <Directory "/var/www/html{{php_dir}}">'
+    
+#    - name: replace Listen port
+#      replace: dest=/etc/httpd/conf/httpd.conf regexp='^Listen\s\d+$' replace='Listen {{listen_port}}'
+
+    - name: set httpd.conf by template
+      template: dest=/etc/httpd/conf/httpd.conf src=/home/st02/ansible/conf/httpd.conf.j2
+
+#    - name: copy .php files to "var/www/html/{{php_dir}}*"
+#      copy: src=/home/st02/ansible/conf/php/ dest=/var/www/html{{php_dir}} owner=apache
+
+    - name: .php files to "var/www/html/{{php_dir}}" by template
+      template: src=/home/st02/ansible/conf/php_j2/{{item}}.j2 dest=/var/www/html{{php_dir}}{{item}}.php owner=apache
+      with_items:
+        - 'PUT'
+        - 'POST'
+        - 'DELETE'
+        - 'GET_ID'
+        - 'GET'
+
+    - name: run httpd
+      service: name=httpd state=restarted enabled=yes
+

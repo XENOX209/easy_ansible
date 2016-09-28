@@ -1,0 +1,11 @@
+
+{% if true  %}
+Listen {{listen_port}}
+{{groups.aps}}
+{% endif %}
+
+{% for i in groups.aps %}
+	{{ i }}
+        {{groups.aps | length}}
+{%endfor%}
+

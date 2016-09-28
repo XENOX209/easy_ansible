@@ -1,0 +1,64 @@
+- name: apserver
+  hosts: ap_test
+#  user: root
+#  sudo : yes
+  become: true 
+#  var:
+#    listen_port: 5000 
+  tasks:
+    - name: create_test user 
+      include: create_user.yaml
+
+    - name: install apache
+      include: inst_apache.yaml
+
+    - name: yum install php,php-mysql
+      yum: name={{item}} state=present
+      with_item: 
+      - php
+      - php-mysql
+
+    - name: addwrite Rewritemodule to httpd.conf for transmit users/:id
+      lineinfile: insertafter='DocumentRoot'  dest=/etc/httpd/conf/httpd.conf line={{item}} mode=0755
+      with_items:
+      - ' </Directory>'
+      - '    RewriteRule ^(.*)$ index.php\?id=$1'
+      - '    RewriteCond  %{REQUEST_URI} !=/v1/users/index.php'
+      - '    RewriteEngine On'
+      - '     Require all granted'
+      - '     Options Indexes FollowSymLinks'
+      - ' <Directory "/var/www/html/v1/users">'
+
+    - name: add write loadmodule for using php file
+      lineinfile: insertafter='# LoadModule foo_module modules/mod_foo.so'  dest=/etc/httpd/conf/httpd.conf line={{item}} mode=0755
+      with_items:
+      - 'AddType text/html .php .html'
+      - 'AddHandler php5-script .php'
+      - 'LoadModule php5_module        modules/libphp5.so'
+
+
+
+    - name: make dir "/var/www/html/v1/users"
+      file: path={{item}} state=directory mode=0755
+      with_items: 
+       - '/var/www/html/v1'
+       - '/var/www/html/v1/users'
+
+#    - name: replace Listen port
+#    - replace: dest=/etc/httpd/conf/httpd.conf regexp='^Listen \d+$' replace='Listen {{listen_port}}'
+
+    - name: copy .php files to "var/www/html/v1/users/*"
+      copy: src=/home/st02/ansible/conf/php/{{item}} dest=/var/www/html/v1/users/{{item}}
+      with_items:
+      - 'PUT.php'
+      - 'GET.php'
+      - 'GET_ID.php'
+      - 'DELETE.php'
+      - 'POST.php'
+      - 'index.php'
+
+    - name: run httpd
+      service: name=httpd state=restarted enabled=yes
+
+
+

@@ -1,0 +1,6 @@
+    transmit_ip: 172.31.2.15
+    listen_port: 5000
+    group_name: test
+    gid: 3000
+    linux_user_name: test_user
+    uid: 3001

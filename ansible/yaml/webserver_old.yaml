@@ -1,0 +1,21 @@
+- name: webserver
+  hosts: webs_test
+#  user: root
+#  sudo : yes
+  become: true
+  tasks:
+    - name : create_test user 
+      include: create_user.yaml
+
+    - name: yum install httpd
+      yum: name=httpd state=present
+    
+    - name: set index.html for check transmit webserver (IP address)
+      lineinfile: dest=/var/www/html/index.html line={{ansible_hostname}} mode=0755 state=present create=yes
+    
+    - name: copy httpd.conf for tranmit to "172.31.2.8" by Rewrite module
+      copy: src=/home/st02/ansible/conf/httpd.conf dest=/etc/httpd/conf/httpd.conf force=yes
+
+    - name: run httpd
+      service: name=httpd state=restarted enabled=yes
+
